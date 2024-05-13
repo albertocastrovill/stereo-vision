@@ -11,6 +11,7 @@ Date: 2024-05-12
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import re
 
 
 # Función para cargar las imágenes
@@ -20,6 +21,19 @@ def cargar_imagenes():
     imgR = cv2.imread('rectified-images/right_infrared_image.png', 0)
     return imgL, imgR
 
+# Leer los parámetros de calibración de la cámara
+def leer_parametros_calibracion(filepath):
+    params = {}
+    # Expresión regular para extraer clave y valor
+    pattern = re.compile(r'"(\w+)":\s*"(-?\d+\.?\d*)"')
+    
+    with open(filepath, 'r') as file:
+        content = file.read()
+        matches = pattern.findall(content)
+        for key, value in matches:
+            params[key] = float(value)
+    
+    return params
 
 # Función para mostrar las imagenes
 def mostrar_imagenes(imgL, imgR):
@@ -72,6 +86,10 @@ def seleccionar_puntos(imgL, imgR):
 def pipeline():
     # Load images
     imgL, imgR = cargar_imagenes()
+
+    #Leer los parametros de calibración
+    params = leer_parametros_calibracion('calibration-parameters.txt')
+    print("Parametros de calibración de la cámara:", params)
 
     left_points, right_points = seleccionar_puntos(imgL, imgR)
 
